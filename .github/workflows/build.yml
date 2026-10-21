@@ -38,6 +38,7 @@ jobs:
             elf2nso forwarder/hbl.elf dist/forwarder/main
             npdmtool forwarder/hbl.json dist/forwarder/main.npdm
             nacptool --create "Lorera" "Independent Homebrew" "1.0.0" dist/forwarder/control.nacp --titleid=010000abcd001000
+            cp lorera_nx.nro dist/lorera_nx.nro
             echo "--- build products ---"
             ls -la dist dist/native dist/forwarder
           '
