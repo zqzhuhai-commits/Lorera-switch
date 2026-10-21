@@ -1,0 +1,12 @@
+build/
+dist/
+*.nro
+*.nsp
+*.elf
+*.nacp
+*.map
+*.o
+*.d
+forwarder/build/
+node_modules/
+.DS_Store

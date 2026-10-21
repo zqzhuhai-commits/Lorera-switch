@@ -1,0 +1,56 @@
+name: Build Switch NRO and Forwarder components
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'source/**'
+      - 'forwarder/**'
+      - 'tools/**'
+      - 'Makefile'
+      - 'icon.jpg'
+      - '.github/workflows/build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build loader NRO (devkitA64)
+        run: |
+          docker run --rm -v "$PWD:/project" -w /project devkitpro/devkita64 bash -lc '
+            export DEVKITPRO=/opt/devkitpro DEVKITA64=/opt/devkitpro/devkitA64
+            export PATH=/opt/devkitpro/portlibs/switch/bin:/opt/devkitpro/tools/bin:/opt/devkitpro/devkitA64/bin:$PATH
+            dkp-pacman -Sy --noconfirm --needed \
+              switch-sdl2 switch-mesa switch-libdrm_nouveau switch-freetype \
+              switch-libpng switch-ffmpeg switch-harfbuzz switch-bzip2 || exit 1
+            make -j2 || exit 1
+            mkdir -p dist
+            cp lorera_nx.nro lorera_nx.elf dist/
+            echo "--- build products ---"
+            ls -la dist/
+          '
+
+      - name: Build forwarder NSO/NPDM/NACP
+        run: |
+          docker run --rm -v "$PWD:/project" -w /project/forwarder devkitpro/devkita64 bash -lc '
+            export DEVKITPRO=/opt/devkitpro DEVKITA64=/opt/devkitpro/devkitA64
+            export PATH=/opt/devkitpro/tools/bin:/opt/devkitpro/devkitA64/bin:$PATH
+            make -j2 || exit 1
+            mkdir -p ../dist/forwarder
+            elf2nso hbl.elf ../dist/forwarder/main
+            npdmtool hbl.json ../dist/forwarder/main.npdm
+            nacptool --create "Lorera" "Independent Homebrew" "1.0.0" ../dist/forwarder/control.nacp --titleid=010000abcd001000
+            echo "--- forwarder products ---"
+            ls -la ../dist/forwarder/
+          '
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lorera-switch-build
+          path: dist/
