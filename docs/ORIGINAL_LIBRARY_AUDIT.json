@@ -1,0 +1,39 @@
+{
+  "game": {
+    "title": "Lorera (拯救劳拉)",
+    "engine": "GameMaker Studio 2 (Android arm64-v8a export)",
+    "data_win": {
+      "size": 81117300,
+      "sha256": "b6b481b2482e3e303fdb1a1c7e66557efeed7173c59e281c8a3366a373133765"
+    },
+    "audiogroup1_dat": {
+      "size": 196107112,
+      "sha256": "8f3b7c32551d64768dfb8a571c9d2bf24b72e72ef182cc80b36f497ab9de4061"
+    },
+    "options_ini": {
+      "size": 43,
+      "sha256": "1f922f87c01b9513cc60173f1fec87ebf0def3f13f485f44cdaa13c2b506f8e5"
+    }
+  },
+  "original_runner": {
+    "libyoyo_so": {
+      "size": 6226528,
+      "sha256": "8aa7a48cf3e2ac2a7a82eecc066358d37695fc7751b78d4c0ad5da87db059a9a",
+      "arch": "AArch64 (arm64-v8a)",
+      "note": "GameMaker runner, loaded natively by the wrapper"
+    },
+    "libcxx_shared_so": {
+      "size": 1055016,
+      "sha256": "1d3551513b78695aca8c487da7145d07c782234cad4541a8ce8a1eca31c21af7",
+      "arch": "AArch64"
+    }
+  },
+  "wrapper_entry_points": [
+    "JNI_OnLoad",
+    "Java_com_yoyogames_runner_RunnerJNILib_Startup",
+    "Java_com_yoyogames_runner_RunnerJNILib_Process",
+    "Java_com_yoyogames_runner_RunnerJNILib_TouchEvent"
+  ],
+  "sd_layout": "sdmc:/switch/Lorera/{lorera_nx.nro,libyoyo.so,libc++_shared.so,game.apk,assets/}",
+  "audit_date": "2026-10-21"
+}

@@ -387,17 +387,12 @@ static void update_touch(void) {
 // ---------------------------------------------------------------------------
 
 int main(int argc, char *argv[]) {
-  if (argc > 0 && argv[0]) {
-    char *dir = strdup(argv[0]);
-    if (dir) {
-      char *slash = strrchr(dir, '/');
-      if (slash) {
-        *slash = 0;
-        chdir(dir);
-      }
-      free(dir);
-    }
-  }
+  // Always run from the fixed SD game directory so the same build works via
+  // hbmenu (NRO), the forwarder NSP and the native NSP alike. Game data
+  // (libyoyo.so, libc++_shared.so, game.apk, assets/) and saves live here.
+  mkdir("sdmc:/switch", 0777);
+  mkdir("sdmc:/switch/Lorera", 0777);
+  chdir("sdmc:/switch/Lorera");
 
   debugPrintf("yoyo_nx: main started\n");
   cpu_boost(1);
