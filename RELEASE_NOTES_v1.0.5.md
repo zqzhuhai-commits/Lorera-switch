@@ -17,7 +17,7 @@
 
 | 文件 | 大小 | SHA256 |
 |---|---|---|
-| Lorera.nsp | 306,830,552 B | `79edea020d10725d4e7016326fea05738b3fab13b3a461cda7501c0291c67d7b` |
+| Lorera.nsp | 306,830,040 B | `79edea020d10725d4e7016326fea05738b3fab13b3a461cda7501c0291c67d7b` |
 | Lorera-Forwarder.nsp | 356,056 B | `7fe5ca6658c70fb25520d917f4045fa2de29713e8729461064d706f3b97bbef7` |
 
 独立复核：3 NCA 可解、无 rightsId、标题「守护劳拉」、AddOnContentBaseId=0、修复代码已确认进入二进制。
