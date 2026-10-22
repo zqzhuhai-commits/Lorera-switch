@@ -10,3 +10,6 @@ dist/
 forwarder/build/
 node_modules/
 .DS_Store
+
+# CI download cache
+dist-ci/
