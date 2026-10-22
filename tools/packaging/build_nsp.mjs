@@ -100,6 +100,7 @@ for (const t of targets) {
     control: new Map([['control.nacp', nacp], ['icon_AmericanEnglish.dat', await bin('icon.jpg')]]),
     romfs,
   });
+  console.log('  built NSP blob, verifying...');
   const bytes = Buffer.from(await result.nsp.arrayBuffer());
   const files = pfsFiles(bytes);
   assert.equal(files.size, 3, 'Expected Program, Control and Meta NCAs');
@@ -125,7 +126,10 @@ for (const t of targets) {
       const acidFlags = npdm.readUInt32LE(npdm.readUInt32LE(0x78) + 0x20c);
       assert.equal(acidFlags & 1, 1, 'Retail application descriptor');
       assert.equal((acidFlags >> 2) & 15, 0, 'Use application memory pool, not system pool');
-      const assets = await decode(parsed.sections.find(s => s.romfsData).romfsData);
+      // Materialize the section blob before decode: the parser's lazy blob
+      // returns an empty tree when sliced directly for large RomFSes.
+      const rawRomfs = parsed.sections.find(s => s.romfsData).romfsData;
+      const assets = await decode(new Blob([await rawRomfs.arrayBuffer()]));
       const expected = await collectBlobs(romfs, '', []);
       const actual = await collectBlobs(assets, '', []);
       assert.equal(actual.length, expected.length, 'Embedded RomFS file count mismatch');
@@ -136,7 +140,8 @@ for (const t of targets) {
       }
       console.log(t.name, 'RomFS embedded files:', expected.map(([p]) => p).join(', '));
     } else if (parsed.contentType === 2) {
-      const control = await decode(parsed.sections.find(s => s.romfsData).romfsData);
+      const rawControl = parsed.sections.find(s => s.romfsData).romfsData;
+      const control = await decode(new Blob([await rawControl.arrayBuffer()]));
       assert.equal(await blobDigest(control['control.nacp']), digest(nacp));
       assert.equal(await blobDigest(control['icon_AmericanEnglish.dat']), digest(await bin('icon.jpg')));
       console.log(t.name, 'Control display version:', Buffer.from(nacp).toString('utf8', 0x3060, 0x3070).replace(/\0.*$/s, ''));
@@ -161,3 +166,4 @@ for (const t of targets) {
   console.log('PASS:', t.name, 'all NCA hashes, title ID, NSO, NPDM, NACP, icon and RomFS verified');
   console.log(t.name, 'SHA256:', digest(bytes));
 }
+console.log('ALL TARGETS DONE');

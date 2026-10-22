@@ -22,10 +22,10 @@ def build_apk(port, out_apk, assets_dir, libyoyo, libcpp):
     with zipfile.ZipFile(out_apk, 'w', zipfile.ZIP_STORED, allowZip64=True) as z:
         zi = zipfile.ZipInfo('AndroidManifest.xml', (2020, 1, 1, 0, 0, 0)); zi.compress_type = zipfile.ZIP_STORED
         z.writestr(zi, manifest)
+        # The PortMaster original ships a libs-only APK: assets are served by
+        # the fake AAssetManager from the sibling assets/ folder, never read
+        # from the APK zip itself. Keep the same shape (keeps the NSP small).
         for arc, src in [
-            ('assets/game.droid', os.path.join(assets_dir, 'data.win')),
-            ('assets/audiogroup1.dat', os.path.join(assets_dir, 'audiogroup1.dat')),
-            ('assets/options.ini', os.path.join(assets_dir, 'options.ini')),
             ('lib/arm64-v8a/libyoyo.so', '/tmp/libyoyo.so'),
             ('lib/arm64-v8a/libc++_shared.so', '/tmp/libcpp.so'),
         ]:
