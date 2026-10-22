@@ -23,8 +23,9 @@
 
 #define CONFIG_NAME "config.txt"
 #define LOG_NAME    "debug.log"
+#define CRASH_NAME  "crash.log"
 
-#define DEBUG_LOG 0
+#define DEBUG_LOG 1
 
 extern int screen_width;
 extern int screen_height;

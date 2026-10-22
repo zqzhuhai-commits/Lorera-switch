@@ -26,7 +26,9 @@ static Mutex s_log_lock;
 
 void userAppInit(void) {
   mutexInit(&s_log_lock);
-  s_log = fopen(LOG_NAME, "w");
+  // NOTE: do NOT open LOG_NAME here. userAppInit runs before main(), i.e.
+  // before we chdir() into the game directory, so the log would land in the
+  // process's initial CWD. debugPrintf() opens it lazily after chdir instead.
 }
 
 void userAppExit(void) {
@@ -38,7 +40,9 @@ void userAppExit(void) {
 int debugPrintf(char *text, ...) {
 #if DEBUG_LOG
   if (!s_log) {
-    s_log = fopen(LOG_NAME, "a");
+    // First call happens after main() chdir()s into the game directory, so
+    // the log is created next to the game data (and truncated per run).
+    s_log = fopen(LOG_NAME, "w");
     if (!s_log) return 0;
   }
   va_list list;

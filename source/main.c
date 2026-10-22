@@ -394,6 +394,8 @@ int main(int argc, char *argv[]) {
   mkdir("sdmc:/switch/Lorera", 0777);
   chdir("sdmc:/switch/Lorera");
 
+  install_crash_handler(); // crash.log lands next to the game data
+
   debugPrintf("yoyo_nx: main started\n");
   cpu_boost(1);
   ctype_init();
@@ -429,6 +431,10 @@ int main(int argc, char *argv[]) {
   debugPrintf("yoyo_nx: loading libyoyo.so\n");
   if (so_load(&game_mod, SO_NAME, chrono_base, heap_so_limit - used) < 0)
     fatal_error("Could not load\n%s.", SO_NAME);
+
+  // For offline symbolization of crash.log PCs.
+  debugPrintf("yoyo_nx: cpp_mod  load_virtbase=%p load_size=0x%zx\n", cpp_mod.load_virtbase, cpp_mod.load_size);
+  debugPrintf("yoyo_nx: game_mod load_virtbase=%p load_size=0x%zx\n", game_mod.load_virtbase, game_mod.load_size);
 
   // relocate + resolve (libyoyo's std::/__cxa_ symbols resolve into libc++_shared)
   debugPrintf("yoyo_nx: resolving imports of cpp_mod\n");
@@ -549,6 +555,9 @@ int main(int argc, char *argv[]) {
     // finishes well within this window; dropping boost too early causes stutters.
     if (boot_frames < 120 && ++boot_frames == 120)
       cpu_boost(0);
+    // Heartbeat during boot so a mid-Process crash is easy to localize.
+    if (boot_frames < 120 && (boot_frames % 20) == 0)
+      debugPrintf("yoyo_nx: boot frame %d done\n", boot_frames);
 
     // Periodic save flush every ~300 frames (~5s) -- avoids per-frame SD writes
     // while ensuring saves aren't lost on unexpected power-off.

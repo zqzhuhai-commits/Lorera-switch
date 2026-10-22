@@ -10,5 +10,6 @@
 #define __ERROR_H__
 
 void fatal_error(const char *fmt, ...) __attribute__((noreturn));
+void install_crash_handler(void);
 
 #endif
