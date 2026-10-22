@@ -12,10 +12,17 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <elf.h>
+#include <switch.h>
 
 #define ALIGN_MEM(x, align) (((x) + ((align) - 1)) & ~((align) - 1))
 
 #define SO_MAX_SEGMENTS 8
+
+// Process handle used for code-memory syscalls. NSO (installed NSP) gets
+// no homebrew-ABI handle from a loader, so it must use the kernel's
+// current-process pseudo-handle (0xFFFF8001); NRO loads get a real handle.
+extern Handle g_own_process;
+void so_set_own_process(void);
 
 typedef struct {
   char *symbol;

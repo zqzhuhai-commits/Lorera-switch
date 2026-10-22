@@ -49,17 +49,20 @@ void install_crash_handler(void) {
 }
 
 void fatal_error(const char *fmt, ...) {
+  char msg[512];
+  va_list list;
+  va_start(list, fmt);
+  vsnprintf(msg, sizeof msg, fmt, list);
+  va_end(list);
+  debugPrintf("yoyo_nx: FATAL: %s\n", msg);
+
   PadState pad;
   padConfigureInput(1, HidNpadStyleSet_NpadStandard);
   padInitializeDefault(&pad);
 
   consoleInit(NULL);
 
-  va_list list;
-  va_start(list, fmt);
-  vprintf(fmt, list);
-  va_end(list);
-
+  printf("%s", msg);
   printf("\n\nPress A to exit.");
 
   consoleUpdate(NULL);

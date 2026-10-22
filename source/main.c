@@ -85,10 +85,16 @@ void __libnx_initheap(void) {
 }
 
 static void check_syscalls(void) {
+  so_set_own_process();
+  debugPrintf("yoyo_nx: own process handle %#llx\n", (long long)g_own_process);
   if (!envIsSyscallHinted(0x77)) fatal_error("svcMapProcessCodeMemory is unavailable.");
+  debugPrintf("yoyo_nx: svcMapProcessCodeMemory hinted OK\n");
   if (!envIsSyscallHinted(0x78)) fatal_error("svcUnmapProcessCodeMemory is unavailable.");
+  debugPrintf("yoyo_nx: svcUnmapProcessCodeMemory hinted OK\n");
   if (!envIsSyscallHinted(0x73)) fatal_error("svcSetProcessMemoryPermission is unavailable.");
-  if (envGetOwnProcessHandle() == INVALID_HANDLE) fatal_error("Own process handle is unavailable.");
+  debugPrintf("yoyo_nx: svcSetProcessMemoryPermission hinted OK\n");
+  if (g_own_process == INVALID_HANDLE) fatal_error("Own process handle is unavailable.");
+  debugPrintf("yoyo_nx: own process handle OK\n");
 }
 
 // Try to serve game data from the NSP's own embedded RomFS (single-file NSP).

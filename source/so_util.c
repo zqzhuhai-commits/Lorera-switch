@@ -43,6 +43,18 @@ void hook_arm64(uintptr_t addr, uintptr_t dst) {
   *(uint64_t *)(hook + 2) = dst;
 }
 
+Handle g_own_process = INVALID_HANDLE;
+
+void so_set_own_process(void) {
+  // NSO (installed NSP) has no homebrew-ABI process handle: libnx's
+  // envGetOwnProcessHandle() returns INVALID_HANDLE there because the handle
+  // only comes from the NRO loader context. The kernel accepts the
+  // current-process pseudo-handle CUR_PROCESS_HANDLE (0xFFFF8001) wherever a
+  // process handle is expected (incl. MapProcessCodeMemory /
+  // SetProcessMemoryPermission).
+  g_own_process = envIsNso() ? (Handle)CUR_PROCESS_HANDLE : envGetOwnProcessHandle();
+}
+
 void so_flush_caches(so_module *mod) {
   armDCacheFlush(mod->load_virtbase, mod->load_size);
   armICacheInvalidate(mod->load_virtbase, mod->load_size);
@@ -57,7 +69,7 @@ void so_finalize(so_module *mod) {
   Result rc = 0;
 
   // map the entire thing as code memory
-  rc = svcMapProcessCodeMemory(envGetOwnProcessHandle(), (u64)mod->load_virtbase, (u64)mod->load_base, mod->load_size);
+  rc = svcMapProcessCodeMemory(g_own_process, (u64)mod->load_virtbase, (u64)mod->load_base, mod->load_size);
   if (R_FAILED(rc)) fatal_error("Error: svcMapProcessCodeMemory failed:\n%08x", rc);
 
   // the kernel never allows W -> X transitions on code memory, so the RX
@@ -92,7 +104,7 @@ void so_finalize(so_module *mod) {
         run_end++;
       const u64 addr = (u64)mod->load_virtbase + pg * 0x1000;
       const u64 size = (run_end - pg) * 0x1000;
-      rc = svcSetProcessMemoryPermission(envGetOwnProcessHandle(), addr, size, want_x ? Perm_Rx : Perm_Rw);
+      rc = svcSetProcessMemoryPermission(g_own_process, addr, size, want_x ? Perm_Rx : Perm_Rw);
       if (R_FAILED(rc)) fatal_error("Error: could not map %u bytes of %s memory at %p:\n%08x", (u32)size, want_x ? "RX" : "RW", (void *)addr, rc);
       pg = run_end;
     }
@@ -463,10 +475,10 @@ int so_unload(so_module *mod) {
       continue;
     const u64 seg_start = ((u64)mod->load_virtbase + p->p_vaddr) & ~0xFFFull;
     const u64 seg_end = ALIGN_MEM((u64)mod->load_virtbase + p->p_vaddr + p->p_memsz, 0x1000);
-    svcSetProcessMemoryPermission(envGetOwnProcessHandle(), seg_start, seg_end - seg_start, Perm_Rw);
+    svcSetProcessMemoryPermission(g_own_process, seg_start, seg_end - seg_start, Perm_Rw);
   }
   // unmap everything
-  svcUnmapProcessCodeMemory(envGetOwnProcessHandle(), (u64)mod->load_virtbase, (u64)mod->load_base, mod->load_size);
+  svcUnmapProcessCodeMemory(g_own_process, (u64)mod->load_virtbase, (u64)mod->load_base, mod->load_size);
 
   // release virtual address range
   virtmemLock();
