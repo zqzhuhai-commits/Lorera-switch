@@ -24,6 +24,6 @@
 
 | 文件 | 大小 | SHA-256 |
 |---|---|---|
-| Lorera.nsp | （打包后填写） | （打包后填写） |
-| Lorera-Forwarder.nsp | （打包后填写） | （打包后填写） |
-| lorera_nx.nro | （打包后填写） | （打包后填写） |
+| Lorera.nsp | 306,830,040 B | `2eaf16a11f5a1522525d729cc7a82cf00d0d77bca8358dbef615da5a133293c8` |
+| Lorera-Forwarder.nsp | 356,056 B | `cae065827981c19c8aeebd60a219ce1901555deba14a1c0d5211d8230b04d28a` |
+| lorera_nx.nro | 21,687,194 B | `0c271438ba8e8630a95adf40e477d95a9880d38d7211fab915eaeabb3b249b96` |
