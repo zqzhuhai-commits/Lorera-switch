@@ -92,7 +92,13 @@ for (const t of targets) {
     romfs['target-version.txt'] = new Blob(['Lorera v1.0.0 external NRO\n']);
     romfs['LICENSE-forwarder.txt'] = new Blob([await bin('forwarder/LICENSE.md')]);
   }
-  const nacp = await bin(t.folder + 'control.nacp');
+  const nacpArr = await bin(t.folder + 'control.nacp');
+  // devkitPro nacptool auto-sets AddOnContentBaseId = titleId | 0x1000,
+  // which makes installers warn "this title uses DLC". Zero it: the game
+  // ships no DLC and a zero base id silences the warning.
+  const nacpBuf = Buffer.from(nacpArr);
+  nacpBuf.fill(0, 0x3070, 0x3078);
+  const nacp = new Blob([nacpBuf]);
   const result = await buildNsp({
     keys, plaintext: false, noLogo: true, noPatchNacpLogo: true,
     titleId: t.titleId, titleVersion: t.version,
@@ -142,9 +148,10 @@ for (const t of targets) {
     } else if (parsed.contentType === 2) {
       const rawControl = parsed.sections.find(s => s.romfsData).romfsData;
       const control = await decode(new Blob([await rawControl.arrayBuffer()]));
-      assert.equal(await blobDigest(control['control.nacp']), digest(nacp));
+      assert.equal(await blobDigest(control['control.nacp']), digest(nacpBuf));
       assert.equal(await blobDigest(control['icon_AmericanEnglish.dat']), digest(await bin('icon.jpg')));
-      console.log(t.name, 'Control display version:', Buffer.from(nacp).toString('utf8', 0x3060, 0x3070).replace(/\0.*$/s, ''));
+      assert.equal(nacpBuf.readBigUInt64LE(0x3070), 0n, 'AddOnContentBaseId must be zero (no DLC)');
+      console.log(t.name, 'Control display version:', Buffer.from(nacpBuf).toString('utf8', 0x3060, 0x3070).replace(/\0.*$/s, ''));
     } else if (parsed.contentType === 1) {
       const meta = pfsFiles(Buffer.from(await parsed.sections.find(s => s.pfs0Data).pfs0Data.arrayBuffer()));
       cnmt = [...meta.values()][0];
