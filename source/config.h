@@ -19,7 +19,12 @@
 #define SOCPP_NAME "libc++_shared.so"
 
 // Loose game assets (the APK's assets/ folder), served via the fake AAssetManager.
+// The default base is the CWD's assets/ (SD card mode). In single-file NSP
+// mode the loader mounts its own RomFS and switches this to "romfs:/assets".
 #define ASSETS_DIR "assets"
+
+extern const char *g_asset_dir; // runtime asset base (ASSETS_DIR or "romfs:/assets")
+extern int g_romfs_mode;        // 1 = game data served from the NSP's embedded RomFS
 
 #define CONFIG_NAME "config.txt"
 #define LOG_NAME    "debug.log"

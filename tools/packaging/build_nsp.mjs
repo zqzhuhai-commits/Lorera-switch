@@ -1,8 +1,12 @@
 // Lorera homebrew NSP packaging (native game + forwarder), based on the
-// GuandanSwitch packaging pipeline (zqzhuhai-commits/guandan-switch).
+// GuandanSwitch / Modern-Combat-3-switch packaging pipelines.
 // Caller-provided keys stay in memory and are never bundled.
+// The native NSP embeds ALL game data (libs, reconstructed APK, assets) in its
+// RomFS, so it is a complete single-file install.
 // Usage: NSP_KEYS="$(cat /path/prod.keys)" node tools/packaging/build_nsp.mjs
-import { readFile, writeFile } from 'node:fs/promises';
+// Requires: dist/native/* (CI), dist/forwarder/* (CI) and dist/romfs-data/ (staged
+// game data: libyoyo.so, libc++_shared.so, game.apk, assets/*).
+import { readFile, writeFile, readdir, stat } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
@@ -17,13 +21,35 @@ const bin = async p => new Uint8Array(await readFile(resolve(root, p)));
 const digest = b => createHash('sha256').update(b).digest('hex');
 const blobDigest = async b => digest(Buffer.from(await b.arrayBuffer()));
 
+// Build a nested {dir: {file: Blob}} tree for the RomFS encoder.
+async function buildRomfsTree(dir) {
+  const out = {};
+  for (const f of await readdir(resolve(root, dir))) {
+    const full = resolve(root, dir, f);
+    const st = await stat(full);
+    if (st.isDirectory()) out[f] = await buildRomfsTree(dir + '/' + f);
+    else out[f] = new Blob([await readFile(full)]);
+  }
+  return out;
+}
+
+// Flatten a nested RomFS map into [path, Blob] pairs for verification.
+async function collectBlobs(obj, prefix, out) {
+  for (const k of Object.keys(obj)) {
+    const v = obj[k];
+    if (v instanceof Blob) out.push([prefix + k, v]);
+    else await collectBlobs(v, prefix + k + '/', out);
+  }
+  return out;
+}
+
 const targets = [
   {
     name: 'Lorera.nsp',
     folder: 'dist/native/',
     titleId: '0100f53a4c4f5245',
     version: 0x00010000,
-    romfs: {},
+    romfs: await buildRomfsTree('dist/romfs-data'),
   },
   {
     name: 'Lorera-Forwarder.nsp',
@@ -100,10 +126,15 @@ for (const t of targets) {
       assert.equal(acidFlags & 1, 1, 'Retail application descriptor');
       assert.equal((acidFlags >> 2) & 15, 0, 'Use application memory pool, not system pool');
       const assets = await decode(parsed.sections.find(s => s.romfsData).romfsData);
-      for (const name of Object.keys(romfs)) {
-        assert.ok(assets[name] && typeof assets[name].arrayBuffer === 'function', 'Missing embedded ' + name);
-        assert.equal(await blobDigest(assets[name]), await blobDigest(romfs[name]), 'Stale asset ' + name);
+      const expected = await collectBlobs(romfs, '', []);
+      const actual = await collectBlobs(assets, '', []);
+      assert.equal(actual.length, expected.length, 'Embedded RomFS file count mismatch');
+      for (const [path, blob] of expected) {
+        const match = actual.find(([p]) => p === path);
+        assert.ok(match, 'Missing embedded ' + path);
+        assert.equal(await blobDigest(match[1]), await blobDigest(blob), 'Stale embedded ' + path);
       }
+      console.log(t.name, 'RomFS embedded files:', expected.map(([p]) => p).join(', '));
     } else if (parsed.contentType === 2) {
       const control = await decode(parsed.sections.find(s => s.romfsData).romfsData);
       assert.equal(await blobDigest(control['control.nacp']), digest(nacp));

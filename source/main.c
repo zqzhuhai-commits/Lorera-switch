@@ -35,6 +35,12 @@ static size_t heap_so_limit = 0;
 so_module cpp_mod;   // libc++_shared.so
 so_module game_mod;  // libchrono.so
 
+// Data source: default SD mode (files next to the NRO). In single-file NSP
+// mode the loader mounts its own embedded RomFS and reads everything from
+// romfs:/, writing only saves/config to SD.
+const char *g_asset_dir = "assets";
+int g_romfs_mode = 0;
+
 void ct_resolve_imports(so_module *mod);
 
 // provide a replacement heap init so the newlib heap is separate from the .so
@@ -85,11 +91,27 @@ static void check_syscalls(void) {
   if (envGetOwnProcessHandle() == INVALID_HANDLE) fatal_error("Own process handle is unavailable.");
 }
 
+// Try to serve game data from the NSP's own embedded RomFS (single-file NSP).
+// Falls back to the SD card layout (NRO / forwarder) if there is no RomFS.
+static void detect_data_source(void) {
+  struct stat st;
+  if (R_SUCCEEDED(romfsMountSelf("romfs")) && stat("romfs:/libyoyo.so", &st) == 0) {
+    g_romfs_mode = 1;
+    g_asset_dir = "romfs:/assets";
+    debugPrintf("yoyo_nx: game data from embedded RomFS (single-file NSP)\n");
+  } else {
+    debugPrintf("yoyo_nx: game data from SD card directory\n");
+  }
+}
+
 static void check_data(void) {
   struct stat st;
-  if (stat(SO_NAME, &st) < 0)    fatal_error("Could not find\n%s.\nCheck your data files.", SO_NAME);
-  if (stat(SOCPP_NAME, &st) < 0) fatal_error("Could not find\n%s.\nCheck your data files.", SOCPP_NAME);
-  if (stat(ASSETS_DIR, &st) < 0) fatal_error("Could not find the\n%s/ folder.\nCheck your data files.", ASSETS_DIR);
+  const char *so = g_romfs_mode ? "romfs:/libyoyo.so" : SO_NAME;
+  const char *socpp = g_romfs_mode ? "romfs:/libc++_shared.so" : SOCPP_NAME;
+  const char *assets = g_romfs_mode ? "romfs:/assets" : ASSETS_DIR;
+  if (stat(so, &st) < 0)    fatal_error("Could not find\n%s.\nCheck your data files.", so);
+  if (stat(socpp, &st) < 0) fatal_error("Could not find\n%s.\nCheck your data files.", socpp);
+  if (stat(assets, &st) < 0) fatal_error("Could not find the\n%s/ folder.\nCheck your data files.", assets);
 }
 
 static void set_screen_size(int w, int h) {
@@ -396,6 +418,8 @@ int main(int argc, char *argv[]) {
 
   install_crash_handler(); // crash.log lands next to the game data
 
+  detect_data_source();
+
   debugPrintf("yoyo_nx: main started\n");
   cpu_boost(1);
   ctype_init();
@@ -423,13 +447,15 @@ int main(int argc, char *argv[]) {
 
   // --- load both modules: libc++_shared first so libyoyo's std imports bind ---
   debugPrintf("yoyo_nx: loading libc++_shared.so\n");
-  if (so_load(&cpp_mod, SOCPP_NAME, heap_so_base, heap_so_limit) < 0)
+  const char *cpp_path = g_romfs_mode ? "romfs:/libc++_shared.so" : SOCPP_NAME;
+  if (so_load(&cpp_mod, cpp_path, heap_so_base, heap_so_limit) < 0)
     fatal_error("Could not load\n%s.", SOCPP_NAME);
 
   void *chrono_base = (void *)ALIGN_MEM((uintptr_t)heap_so_base + cpp_mod.load_size, 0x100000);
   size_t used = (uintptr_t)chrono_base - (uintptr_t)heap_so_base;
   debugPrintf("yoyo_nx: loading libyoyo.so\n");
-  if (so_load(&game_mod, SO_NAME, chrono_base, heap_so_limit - used) < 0)
+  const char *game_path = g_romfs_mode ? "romfs:/libyoyo.so" : SO_NAME;
+  if (so_load(&game_mod, game_path, chrono_base, heap_so_limit - used) < 0)
     fatal_error("Could not load\n%s.", SO_NAME);
 
   // For offline symbolization of crash.log PCs.
@@ -501,7 +527,12 @@ int main(int argc, char *argv[]) {
   {
     char apk_path[600];
     char save_path[600];
-    snprintf(apk_path, sizeof(apk_path), "%s/game.apk", wdir);
+    if (g_romfs_mode) {
+      // Single-file NSP: the APK (reconstructed) lives in the embedded RomFS.
+      snprintf(apk_path, sizeof(apk_path), "romfs:/game.apk");
+    } else {
+      snprintf(apk_path, sizeof(apk_path), "%s/game.apk", wdir);
+    }
     // Strip "sdmc:" prefix if present -- use plain POSIX path
     const char *posix_dir = wdir;
     if (strncmp(posix_dir, "sdmc:", 5) == 0) posix_dir += 5;

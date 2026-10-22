@@ -28,7 +28,8 @@ static int is_abs_path(const char *p) {
 }
 
 // The engine passes asset names relative to the APK assets root. We serve them
-// from ASSETS_DIR. A leading "assets/" or "./" is tolerated and stripped.
+// from g_asset_dir ("assets" on SD, or "romfs:/assets" in single-file NSP
+// mode). A leading "assets/" or "./" is tolerated and stripped.
 // Absolute / device paths are passed through verbatim.
 static void resolve(char *out, size_t out_size, const char *name) {
   if (!name) name = "";
@@ -40,7 +41,7 @@ static void resolve(char *out, size_t out_size, const char *name) {
     name += (name[0] == '/') ? 1 : 2;
   if (!strncmp(name, "assets/", 7))
     name += 7;
-  snprintf(out, out_size, "%s/%s", ASSETS_DIR, name);
+  snprintf(out, out_size, "%s/%s", g_asset_dir, name);
 }
 
 int asset_exists(const char *name) {
