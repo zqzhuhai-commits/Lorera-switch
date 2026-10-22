@@ -2,7 +2,7 @@
 #   make -f Game.mk             -> lorera_nx.nro
 #   make -f Game.mk nsp-components -> dist/native/{main,main.npdm,control.nacp}
 TARGET := lorera_nx
-APP_TITLE := Lorera
+APP_TITLE := 守护劳拉
 APP_AUTHOR := 96Brothers
 APP_VERSION := 1.0.0
 PORT_NPDM_TITLEID := 0100F53A4C4F5245

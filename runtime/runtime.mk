@@ -15,7 +15,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 
 #---------------------------------------------------------------------------------
 TARGET		?=	lorera_nx
-APP_TITLE	?=	Lorera
+APP_TITLE	?=	守护劳拉
 APP_AUTHOR	?=	96Brothers
 APP_VERSION	?=	1.0.0
 BUILD		?=	build

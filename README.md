@@ -1,4 +1,4 @@
-# Lorera（拯救劳拉）— Nintendo Switch 移植
+# Lorera（守护劳拉）— Nintendo Switch 移植
 
 基于 [stt16bit_nx](https://github.com/boraeskicioglu/stt16bit_nx)（MIT）体系的 GameMaker Studio 2 Switch 加载器改造（参考工程路线：[shadowguardian-switch](https://github.com/zqzhuhai-commits/shadowguardian-switch)）。加载原版安卓 ARM64 引擎库 `libyoyo.so`，在 Switch 上原生运行，无模拟层。
 
