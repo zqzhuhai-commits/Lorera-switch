@@ -11,6 +11,8 @@
 - [x] NSP 容器：3 个 NCA（Program/Control/Meta）、AES-CTR 加密、无 rights ID（打包脚本断言）
 - [x] NPDM/NACP/图标/CNMT 逐项与打包脚本校验
 - [x] 加载器目录固定为 `sdmc:/switch/Lorera`（源码审查）
+- [x] CI 构建（devkitA64 docker）成功，产物哈希记录于 `BUILD_REPORT.md`
+- [x] 双 NSP 本地打包并全项断言通过（`Lorera.nsp` / `Lorera-Forwarder.nsp`）
 
 ## 未验证（需实机）
 
