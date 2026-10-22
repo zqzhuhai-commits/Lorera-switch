@@ -23,7 +23,7 @@ sdmc:/switch/Lorera/
 ### 方式一：原生 NSP（推荐）
 
 1. 将 `switch/Lorera/` 整个目录复制到 SD 卡根目录。
-2. 用 Tinfoil / DBI 安装 `Lorera.nsp`（Title ID `0100F53A4C4F5245`）。
+2. 用 Tinfoil / DBI 安装 `Lorera.nsp`（Title ID `0100F53A4C4F0000`）。
 3. 主界面启动 "Lorera" 图标，直接运行。
 
 ### 方式二：forwarder NSP

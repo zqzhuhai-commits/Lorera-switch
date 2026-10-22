@@ -1,8 +1,8 @@
 {
   "name": "LoreraGame",
-  "title_id": "0x0100F53A4C4F5245",
-  "title_id_range_min": "0x0100F53A4C4F5245",
-  "title_id_range_max": "0x0100F53A4C4F5245",
+  "title_id": "0x0100F53A4C4F0000",
+  "title_id_range_min": "0x0100F53A4C4F0000",
+  "title_id_range_max": "0x0100F53A4C4F0000",
   "main_thread_stack_size": "0x800000",
   "main_thread_priority": 44,
   "default_cpu_id": 0,
@@ -248,7 +248,7 @@
       }
     }
   ],
-  "program_id": "0x0100F53A4C4F5245",
-  "program_id_range_min": "0x0100F53A4C4F5245",
-  "program_id_range_max": "0x0100F53A4C4F5245"
+  "program_id": "0x0100F53A4C4F0000",
+  "program_id_range_min": "0x0100F53A4C4F0000",
+  "program_id_range_max": "0x0100F53A4C4F0000"
 }

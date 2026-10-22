@@ -24,7 +24,7 @@ sdmc:/switch/Lorera/
     └── options.ini
 ```
 
-2. 安装 `Lorera.nsp`（Title ID `0100F53A4C4F5245`）。
+2. 安装 `Lorera.nsp`（Title ID `0100F53A4C4F0000`）。
 3. 主界面出现 "Lorera" 图标，直接启动。
 
 ### 方式二：forwarder NSP

@@ -14,7 +14,7 @@
 |---|---|---|---|
 | `lorera_nx.nro` | 21,666,902 B | `17ac45c2…af3a8` | 加载器 NRO（NRO0 魔数已确认） |
 | `dist/native/main` | 14,218,788 B | `37ac27dd…9f3bb0` | 原生 NSO（elf2nso） |
-| `dist/native/main.npdm` | 996 B | `6f108cf4…0449585` | 原生应用 NPDM（`0100F53A4C4F5245`） |
+| `dist/native/main.npdm` | 996 B | `6f108cf4…0449585` | 原生应用 NPDM（`0100F53A4C4F0000`） |
 | `dist/native/control.nacp` | 16,384 B | `2d948750…cb0f6da` | 原生 NACP（显示版本 1.0.0） |
 | `dist/forwarder/main` | 97,953 B | `3fc4a519…2e557d5f` | forwarder NSO |
 | `dist/forwarder/main.npdm` | 1,012 B | `660e5af1…2b88639` | forwarder NPDM（`010000ABCD001000`） |

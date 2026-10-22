@@ -15,7 +15,7 @@
 - 包名/版本中性化：`getPackageName`/`GetAppID` → `com.lorera.game`，`getVersion` → `1.0.0`
 - 默认语言 `en`
 - 固定运行目录：`main()` 无条件 `chdir("sdmc:/switch/Lorera")`（创建目录），使 hbmenu NRO / forwarder NSP / 原生 NSP 三种启动方式行为一致
-- 原生 NSP 支持：`tools/config.npdm.json`（应用 NPDM，Title ID `0100F53A4C4F5245`），`make -f Game.mk nsp-components` 产出 NSO/NPDM/NACP
+- 原生 NSP 支持：`tools/config.npdm.json`（应用 NPDM，Title ID `0100F53A4C4F0000`），`make -f Game.mk nsp-components` 产出 NSO/NPDM/NACP
 - 图标：Steam 官方宣传图裁切 256×256 JPEG
 
 ## 存档与配置

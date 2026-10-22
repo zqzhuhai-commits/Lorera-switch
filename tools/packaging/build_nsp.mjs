@@ -47,7 +47,7 @@ const targets = [
   {
     name: 'Lorera.nsp',
     folder: 'dist/native/',
-    titleId: '0100f53a4c4f5245',
+    titleId: '0100f53a4c4f0000',
     version: 0x00010000,
     romfs: await buildRomfsTree('dist/romfs-data'),
   },
